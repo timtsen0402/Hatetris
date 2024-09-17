@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using static Mechanics;
 public class Motion : MonoBehaviour
 {
     public Vector3 rotationPoint;
@@ -55,9 +54,25 @@ public class Motion : MonoBehaviour
             {
                 transform.position -= new Vector3(0, -1, 0);
                 AddToGrid();
-                isPlaced = true;
+                Mechanics.isPlaced = true;
                 this.enabled = false;
             }
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            for (; ; )
+            {
+                transform.position += new Vector3(0, -1, 0);
+                if (!ValidMove())
+                {
+                    transform.position -= new Vector3(0, -1, 0);
+                    AddToGrid();
+                    Mechanics.isPlaced = true;
+                    this.enabled = false;
+                    break;
+                }
+            }
+
         }
     }
     bool ValidMove()
@@ -66,9 +81,17 @@ public class Motion : MonoBehaviour
         {
             int roundX = Mathf.RoundToInt(child.transform.position.x);
             int roundY = Mathf.RoundToInt(child.transform.position.y);
-            if (roundX < 0 || roundX >= map_width || roundY < 0 || roundY >= map_height)
+
+            // 首先检查 X 坐标
+            if (roundX < 0 || roundX >= Mechanics.Instance.MapWidth)
                 return false;
-            if (grid[roundX, roundY] != null)
+
+            // 然后检查 Y 坐标
+            if (roundY < 0 || roundY >= Mechanics.Instance.MapHeight)
+                return false;
+
+            // 最后检查网格占用情况
+            if (Mechanics.grid[roundX, roundY] != null)
                 return false;
         }
 
@@ -93,7 +116,7 @@ public class Motion : MonoBehaviour
             int roundX = Mathf.RoundToInt(child.transform.position.x);
             int roundY = Mathf.RoundToInt(child.transform.position.y);
 
-            grid[roundX, roundY] = child;
+            Mechanics.grid[roundX, roundY] = child;
         }
     }
     /*
