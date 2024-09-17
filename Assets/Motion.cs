@@ -79,8 +79,8 @@ public class Motion : MonoBehaviour
     {
         foreach (Transform child in transform)
         {
-            int roundX = Mathf.RoundToInt(child.transform.position.x);
-            int roundY = Mathf.RoundToInt(child.transform.position.y);
+            int roundX = (int)Mathf.Floor(child.transform.position.x);
+            int roundY = (int)Mathf.Floor(child.transform.position.y);
 
             // 首先检查 X 坐标
             if (roundX < 0 || roundX >= Mechanics.Instance.MapWidth)
@@ -113,8 +113,8 @@ public class Motion : MonoBehaviour
     {
         foreach (Transform child in transform)
         {
-            int roundX = Mathf.RoundToInt(child.transform.position.x);
-            int roundY = Mathf.RoundToInt(child.transform.position.y);
+            int roundX = (int)Mathf.Floor(child.transform.position.x);
+            int roundY = (int)Mathf.Floor(child.transform.position.y);
 
             Mechanics.grid[roundX, roundY] = child;
         }

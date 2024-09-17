@@ -23,6 +23,7 @@ public class Mechanics : MonoBehaviour
 
     public static bool isPlaced = true;
     public static bool isGameOver = false;
+    public static Vector3 offset = new Vector2(-0.5f, -0.5f);
     public static Vector3 spawnPosition;
     public static Transform[,] grid;
     public static int score = 0;
@@ -84,10 +85,10 @@ public class Mechanics : MonoBehaviour
         if (isPlaced)
         {
             int randomIndex = Random.Range(0, tetrominos.Length);
-            Instantiate(tetrominos[randomIndex], spawnPosition, Quaternion.identity);
+            GameObject newTetromino = Instantiate(tetrominos[randomIndex], spawnPosition, Quaternion.identity);
 
-            //Vector3 offset = new Vector3(0.5f, 0.5f, 0);
-            //newTetromino.transform.position += offset;
+
+            newTetromino.transform.position += offset;
 
             isPlaced = false;
             CheckGameOver();
