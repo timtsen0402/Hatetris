@@ -75,7 +75,7 @@ public class Motion : MonoBehaviour
 
         }
     }
-    bool ValidMove()
+    public bool ValidMove()
     {
         foreach (Transform child in transform)
         {
@@ -109,7 +109,7 @@ public class Motion : MonoBehaviour
             }
         }
     }
-    void AddToGrid()
+    public void AddToGrid()
     {
         foreach (Transform child in transform)
         {

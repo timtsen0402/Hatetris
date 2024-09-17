@@ -1,6 +1,7 @@
 // 使用 SerializeField 使这些变量可在 Inspector 中编辑
 
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -10,8 +11,8 @@ public class Mechanics : MonoBehaviour
 {
     // 单例实例
     public static Mechanics Instance { get; private set; }
+    [field: SerializeField] public GameObject[] Tetrominoes { get; private set; }
 
-    public GameObject[] tetrominos;
     public TextMeshProUGUI score_txt;
     public GameObject Map;
 
@@ -20,6 +21,7 @@ public class Mechanics : MonoBehaviour
     [field: SerializeField] public int Vacuum { get; private set; } = 3;
 
     int deadLine;
+    GameObject currentTetromino;
 
     public static bool isPlaced = true;
     public static bool isGameOver = false;
@@ -34,7 +36,7 @@ public class Mechanics : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            InitializeGame();
         }
         else
         {
@@ -44,7 +46,25 @@ public class Mechanics : MonoBehaviour
 
     void Start()
     {
-        InitializeGame();
+        StartCoroutine(GameLoop());
+    }
+    IEnumerator GameLoop()
+    {
+        while (!isGameOver)
+        {
+            Spawn();
+
+            // ai play tetris
+            AIPlayer.Instance.MoveTetrominoRandomly();
+            AIPlayer.Instance.PlaceTetrominoRandomly();
+
+            CheckLines();
+            UpdateScore();
+
+            yield return new WaitForSeconds(1);
+            // yield break;
+        }
+
     }
 
     public void InitializeGame()
@@ -58,22 +78,22 @@ public class Mechanics : MonoBehaviour
         deadLine = MapHeight - Vacuum;
 
         // 计算生成位置
-        spawnPosition = new Vector2(MapWidth / 2, deadLine);
+        spawnPosition = new Vector2(MapWidth / 2, deadLine + 1);
 
         score = 0;
         isGameOver = false;
         isPlaced = true;
     }
 
-    void Update()
-    {
-        if (!isGameOver)
-        {
-            Spawn();
-            CheckLines();
-            UpdateScore();
-        }
-    }
+    // void Update()
+    // {
+    //     if (!isGameOver)
+    //     {
+    //         Spawn();
+    //         CheckLines();
+    //         UpdateScore();
+    //     }
+    // }
 
     void UpdateScore()
     {
@@ -84,11 +104,9 @@ public class Mechanics : MonoBehaviour
     {
         if (isPlaced)
         {
-            int randomIndex = Random.Range(0, tetrominos.Length);
-            GameObject newTetromino = Instantiate(tetrominos[randomIndex], spawnPosition, Quaternion.identity);
-
-
+            GameObject newTetromino = Instantiate(TetrominoGenerator.Instance.ChooseRandomly(), spawnPosition, Quaternion.identity);
             newTetromino.transform.position += offset;
+            currentTetromino = newTetromino;
 
             isPlaced = false;
             CheckGameOver();
@@ -177,5 +195,10 @@ public class Mechanics : MonoBehaviour
 
         // 重新初始化游戏
         InitializeGame();
+    }
+
+    public GameObject GetCurrentTetromino()
+    {
+        return currentTetromino;
     }
 }
