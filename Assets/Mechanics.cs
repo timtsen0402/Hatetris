@@ -14,11 +14,15 @@ public class Mechanics : MonoBehaviour
     [field: SerializeField] public GameObject[] Tetrominoes { get; private set; }
 
     public TextMeshProUGUI score_txt;
+    public TextMeshProUGUI used_txt;
     public GameObject Map;
 
     [field: SerializeField] public int MapHeight { get; private set; } = 20;
     [field: SerializeField] public int MapWidth { get; private set; } = 10;
     [field: SerializeField] public int Vacuum { get; private set; } = 3;
+
+    [SerializeField]
+    private TetrominoAlgorithm currentAlgorithm = TetrominoAlgorithm.ChooseSZ;
 
     int deadLine;
     GameObject currentTetromino;
@@ -29,6 +33,7 @@ public class Mechanics : MonoBehaviour
     public static Vector3 spawnPosition;
     public static Transform[,] grid;
     public static int score = 0;
+    public static int used = 0;
 
     private void Awake()
     {
@@ -44,28 +49,28 @@ public class Mechanics : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        StartCoroutine(GameLoop());
-    }
-    IEnumerator GameLoop()
-    {
-        while (!isGameOver)
-        {
-            Spawn();
+    // void Start()
+    // {
+    //     StartCoroutine(GameLoop());
+    // }
+    // IEnumerator GameLoop()
+    // {
+    //     while (!isGameOver)
+    //     {
+    //         Spawn();
 
-            // ai play tetris
-            AIPlayer.Instance.MoveTetrominoRandomly();
-            AIPlayer.Instance.PlaceTetrominoRandomly();
+    //         // ai play tetris
+    //         AIPlayer.Instance.MoveTetrominoRandomly();
+    //         AIPlayer.Instance.PlaceTetrominoRandomly();
 
-            CheckLines();
-            UpdateScore();
+    //         CheckLines();
+    //         UpdateScore();
 
-            yield return new WaitForSeconds(1);
-            // yield break;
-        }
+    //         yield return new WaitForSeconds(1);
+    //         // yield break;
+    //     }
 
-    }
+    // }
 
     public void InitializeGame()
     {
@@ -85,28 +90,31 @@ public class Mechanics : MonoBehaviour
         isPlaced = true;
     }
 
-    // void Update()
-    // {
-    //     if (!isGameOver)
-    //     {
-    //         Spawn();
-    //         CheckLines();
-    //         UpdateScore();
-    //     }
-    // }
+    void Update()
+    {
+        if (!isGameOver)
+        {
+            Spawn();
+            CheckLines();
+            UpdateScore();
+        }
+    }
 
     void UpdateScore()
     {
         score_txt.text = score.ToString();
+        used_txt.text = used.ToString();
     }
 
     public void Spawn()
     {
         if (isPlaced)
         {
-            GameObject newTetromino = Instantiate(TetrominoGenerator.Instance.ChooseRandomly(), spawnPosition, Quaternion.identity);
+            GameObject newTetromino = Instantiate(GetTetrominoByAlgorithm(), spawnPosition, Quaternion.identity);
             newTetromino.transform.position += offset;
             currentTetromino = newTetromino;
+            used++;
+
 
             isPlaced = false;
             CheckGameOver();
@@ -200,5 +208,20 @@ public class Mechanics : MonoBehaviour
     public GameObject GetCurrentTetromino()
     {
         return currentTetromino;
+    }
+
+    private GameObject GetTetrominoByAlgorithm()
+    {
+        switch (currentAlgorithm)
+        {
+            case TetrominoAlgorithm.ChooseSZ:
+                return TetrominoGenerator.Instance.ChooseSZ();
+            case TetrominoAlgorithm.Choose7Bag:
+                return TetrominoGenerator.Instance.Choose7Bag();
+            case TetrominoAlgorithm.ChooseRandomly:
+                return TetrominoGenerator.Instance.ChooseRandomly();
+            default:
+                return TetrominoGenerator.Instance.ChooseRandomly();
+        }
     }
 }
